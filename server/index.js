@@ -3,15 +3,12 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors"); // Import cors package
 const authRoutes = require("./routes/authRoutes");
+const path = require("path");
 
 const WebSocket = require("ws"); // Import WebSocket package
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-const path = require("path");
-
-app.use(express.static(path.join(__dirname, "build"))); // put this line of code in app.js
 
 // MongoDB connection
 mongoose
@@ -26,9 +23,15 @@ mongoose
     console.error("MongoDB connection error:", error);
   });
 
+const __dirname = path.resolve();
+
 app.use(bodyParser.json());
 app.use(cors());
 app.use(authRoutes);
+app.use(express.static(path.join(__dirname + "/client/dist")));
+app.get("*",(req,res)=>{
+  res.sendFile(path.join(__dirname,'client','dist','index.html'))
+})
 
 // Create a WebSocket server
 const wss = new WebSocket.Server({ noServer: true });
